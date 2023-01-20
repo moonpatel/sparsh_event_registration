@@ -8,15 +8,12 @@ const {
     addDoc,
     query,
     where,
-    getDocs,
     doc,
     updateDoc,
     arrayUnion,
     serverTimestamp,
     getDoc,
     getDocs,
-    where,
-    query,
 } = require("firebase/firestore");
 
 // Your web app's Firebase configuration
@@ -45,7 +42,7 @@ app.post("/events/register", async (req, res) => {
 
     try {
         // query to find if user is already registered
-        const q = query(usersRef, where("event", "==", user.event), where("name", "==", user.name));
+        const q = query(usersRef, where("event", "==", user.event), where("email", "==", user.email));
         const querySS = await getDocs(q);
 
         // check if user is already registered for the event.
@@ -79,7 +76,7 @@ app.post("/events/register", async (req, res) => {
             });
             await updateDoc(doc(db, "events", eventID), { users: arrayUnion(userDocRef.id) });
             console.log("User created with id: ", userDocRef.id);
-            res.json({ succes: true, message: "User registered", id: userDocRef.id });
+            res.status(200).json({ succes: true, message: "User registered", id: userDocRef.id });
         } else {
             res.json({ success: false, message: "User already registered for given event" });
         }
