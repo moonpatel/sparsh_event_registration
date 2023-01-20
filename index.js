@@ -10,11 +10,13 @@ const {
     where,
     getDocs,
     doc,
-    setDoc,
     updateDoc,
     arrayUnion,
     serverTimestamp,
     getDoc,
+    getDocs,
+    where,
+    query,
 } = require("firebase/firestore");
 
 // Your web app's Firebase configuration
@@ -87,6 +89,34 @@ app.post("/events/register", async (req, res) => {
     }
 });
 
+app.get("/events/:name", async (req, res) => {
+    try {
+        let registeredUsers = [];
+        const q = query(collection(db, "users"), where("event", "==", req.params.name));
+
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            res.status(404).json({
+                status: "This event does not exist",
+            });
+        } else {
+            querySnapshot.forEach((doc) => {
+                // doc.data() is never undefined for query doc snapshots
+                console.log(doc.id, " => ", doc.data());
+                registeredUsers.push(doc.data());
+            });
+            console.log(registeredUsers);
+            res.status(200).json({
+                data: registeredUsers,
+            });
+        }
+    } catch (e) {
+        res.status(404).json({
+            status: "Unsuccessful",
+        });
+    }
+});
+
 app.listen(3000, () => {
-    console.log("Listening on port 3000");
+    console.log(`listening on port 3000`);
 });
